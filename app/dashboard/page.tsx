@@ -134,7 +134,6 @@ export default function DashboardPage() {
   }
 
   useEffect(() => {
-    setSearch('');
     const storedToken = sessionStorage.getItem('token');
 
     if (storedToken === null) {
@@ -144,7 +143,29 @@ export default function DashboardPage() {
 
     const token = storedToken;
 
-    loadTasks(token);
+    let ignore = false;
+
+    async function fetchInitialTasks() {
+      try {
+        const { response, data } = await getAuthenticated('/api/tasks', token);
+
+        if (!ignore && response.ok) {
+          setTasks(data.data.tasks);
+        }
+      } catch (error) {
+        console.error('Failed to load tasks:', error);
+      } finally {
+        if (!ignore) {
+          setChecking(false);
+        }
+      }
+    }
+
+    void fetchInitialTasks();
+
+    return () => {
+      ignore = true;
+    };
   }, [router]);
 
   if (checking) {
