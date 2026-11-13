@@ -1,44 +1,62 @@
 # TaskFlow – Frontend
 
-TaskFlow is a task management application built with Next.js, React, TypeScript, and Tailwind CSS. It allows users to register, log in, and manage their personal tasks through a responsive dashboard. TaskFlow helps users organize tasks, track progress, and manage their daily work.
+TaskFlow is a task management application built with Next.js, React, TypeScript, and Tailwind CSS. It allows users to register, log in, and manage their personal tasks through a responsive dashboard.
+
+The application helps users organize tasks, track progress, and manage their daily activities through a simple and intuitive interface.
 
 ## Live Demo
 
-**Application:** https://taskflow-satyobroto.vercel.app
+- **Live Application:** https://taskflow-satyobroto.vercel.app
+- **Backend API:** https://taskflow-api-c3hg.onrender.com
+- **API Documentation (Swagger):** https://taskflow-api-c3hg.onrender.com/api-docs/
 
-**API Documentation:** https://taskflow-api-c3hg.onrender.com/api-docs/
+## Demo Login Credentials
 
-## Screenshots
+Use the following demo account to explore the TaskFlow dashboard.
 
-<table>
-  <tr>
-    <td align="center">
-      <strong>Homepage</strong><br/>
-      <img src="screenshots/homepage.png" width="400" alt="TaskFlow Homepage"/>
-    </td>
-  </tr>
-</table>
+| Field | Credentials |
+|---|---|
+| Email | satyo123@example.com |
+| Password | password123 |
+
+**How to access the dashboard:**
+
+1. Open the [TaskFlow Live Application](https://taskflow-satyobroto.vercel.app).
+2. Navigate to the Login page.
+3. Enter the demo email and password.
+4. Click **Login** to access the dashboard.
+5. Explore the task management features.
 
 ## Features
 
 - User registration and login
 - JWT-based authentication
+- Personal task management dashboard
 - Create tasks with titles and descriptions
-- View and manage tasks
-- Edit and delete tasks
+- View, edit, and delete tasks
 - Update task status
 - Search tasks by title or description
 - Filter tasks by status
+- User-specific task management
 - Responsive user interface
+- Input validation and error handling
 
-## Tech Stack
+## Technology Stack
 
-- Next.js
-- React
-- TypeScript
-- Tailwind CSS
-- REST API
-- JWT Authentication
+| Technology | Purpose |
+|---|---|
+| Next.js | React framework |
+| React | User interface |
+| TypeScript | Type safety |
+| Tailwind CSS | Styling |
+| REST API | Backend communication |
+| JWT | Authentication |
+
+## Screenshots
+
+### Homepage
+
+![TaskFlow Homepage](screenshots/homepage.png)
 
 ## Project Structure
 
@@ -60,89 +78,19 @@ frontend/
 
 ## Getting Started
 
-### 1. Install dependencies
+Follow these instructions to run the frontend application locally.
 
-```bash
-npm install
-```
+### Prerequisites
 
-### 2. Configure environment variables
-
-Create a `.env.local` file in the frontend root directory:
-
-```env
-NEXT_PUBLIC_API_URL=https://taskflow-api-c3hg.onrender.com
-```
-
-This variable specifies the backend API URL.
-
-### 3. Start the development server
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-## Backend
-
-The frontend communicates with the TaskFlow REST API.
-
-- **Production API:** https://taskflow-api-c3hg.onrender.com
-- **API Documentation:** https://taskflow-api-c3hg.onrender.com/api-docs/
-- **Health Check:** https://taskflow-api-c3hg.onrender.com/health
-
-## Authentication
-
-TaskFlow uses JWT-based authentication. After successful login, the authentication token is stored in the browser's session storage and used for authenticated API requests.
-
-## Features
-
-- User registration and login
-- JWT-based authentication
-- Task creation, editing, and deletion
-- Task status management
-- Search and filter tasks
-- User-specific task ownership
-- Input validation and error handling
-- Responsive user interface
-- Redis caching
-- API documentation with Swagger
-
-## Technology Stack
-
-### Frontend
-- Next.js
-- React
-- TypeScript
-- Tailwind CSS
-
-### Backend
 - Node.js
-- Express.js
-- TypeScript
-- Prisma ORM
-- JWT Authentication
-
-### Database and Infrastructure
-- PostgreSQL (Neon)
-- Redis
-- Docker Desktop (local development)
-
-### Deployment
-- Frontend: Vercel
-- Backend: Render
-
-## Architecture
-
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for the production architecture and local development environment diagrams.
-
-## Local Development
+- npm
+- Running TaskFlow backend API
 
 ### 1. Clone the repository
 
 ```bash
 git clone https://github.com/broto1234/taskflow-frontend.git
+
 cd taskflow-frontend
 ```
 
@@ -154,13 +102,21 @@ npm install
 
 ### 3. Configure environment variables
 
-Create a `.env.local` file:
+Create a `.env.local` file in the frontend root directory.
+
+For the production backend:
+
+```env
+NEXT_PUBLIC_API_URL=https://taskflow-api-c3hg.onrender.com
+```
+
+For local backend development:
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:5000
 ```
 
-For production, configure the deployed backend URL instead.
+This variable specifies the backend API URL used by the frontend.
 
 ### 4. Start the development server
 
@@ -168,15 +124,58 @@ For production, configure the deployed backend URL instead.
 npm run dev
 ```
 
-Open http://localhost:3000 in your browser.
+Open your browser and navigate to:
 
-**Note:** The backend API must also be running for authentication and task management to work locally. See the [backend repository](https://github.com/broto1234/taskflow-api).
+http://localhost:3000
 
-## Related Repository
+## Authentication
 
-[TaskFlow Backend API](https://github.com/broto1234/taskflow-api)
+TaskFlow uses JWT-based authentication to secure user access.
+
+- Users can register and log in using their credentials.
+- After successful login, the authentication token is stored in browser session storage.
+- The token is included in authenticated API requests.
+- Users can manage only their own tasks.
+
+## Backend Integration
+
+The frontend communicates with the TaskFlow REST API for authentication and task management.
+
+**Backend Repository:** [TaskFlow Backend API](https://github.com/broto1234/taskflow-api)
+
+**Production API Endpoints:**
+
+- **Base URL:** https://taskflow-api-c3hg.onrender.com
+- **API Documentation:** https://taskflow-api-c3hg.onrender.com/api-docs/
+- **Health Check:** https://taskflow-api-c3hg.onrender.com/health
+
+For backend setup and configuration, refer to the backend repository.
+
+## Architecture
+
+For detailed information about the system architecture, production deployment, and local development environment, see: [ARCHITECTURE.md](./ARCHITECTURE.md)
+
+## Deployment & Infrastructure
+
+The application uses the following technologies and hosting platforms:
+
+| Component | Technology / Platform |
+|---|---|
+| Frontend Hosting | Vercel |
+| Backend Hosting | Render |
+| Database | PostgreSQL |
+| Database Hosting (Current) | Neon |
+| Database Hosting (Previous) | Render PostgreSQL |
+| Caching | Redis |
+
+**Database Infrastructure:**
+
+- Initially used PostgreSQL hosted on Render.
+- Migrated to Neon PostgreSQL to use its free-tier database hosting.
+- Continued using PostgreSQL as the primary relational database.
 
 ## Author
 
-**Satyobroto Talukder**  
-Full-Stack Developer
+**Satyobroto Talukder**
+
+Full-Stack Developer [GitHub](https://github.com/broto1234) [Portfolio](https://satyobroto-portfolio.vercel.app/)

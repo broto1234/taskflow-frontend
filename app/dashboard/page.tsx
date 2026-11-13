@@ -13,10 +13,19 @@ type Task = {
   status: 'TODO' | 'IN_PROGRESS' | 'COMPLETED';
 };
 
+type Pagination = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+};
+
+
 export default function DashboardPage() {
   const router = useRouter();
   const [checking, setChecking] = useState(true);
   const [tasks, setTasks] = useState<Task[] | null>(null);
+  const [pagination, setPagination] = useState<Pagination | null>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [isCreating, setIsCreating] = useState(false);
@@ -25,21 +34,41 @@ export default function DashboardPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
-
+  const [currentPage, setCurrentPage] = useState(1);
+  
   const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
   const [editedTitle, setEditedTitle] = useState('');
   const [editedDescription, setEditedDescription] = useState('');
-  
 
-  async function loadTasks(token: string) {
+  async function loadTasks(
+  token: string,
+  page = 1,
+  searchTerm = search,
+  selectedStatus = statusFilter
+) {
     try {
+      const params = new URLSearchParams({
+        page: String(page),
+        limit: '5',
+      });
+
+      if (searchTerm.trim()) {
+        params.set('search', searchTerm.trim());
+      }
+
+      if (selectedStatus) {
+        params.set('status', selectedStatus);
+      }
+
       const { response, data } = await getAuthenticated(
-        '/api/tasks',
+        `/api/tasks?${params.toString()}`,
         token
       );
 
       if (response.ok) {
         setTasks(data.data.tasks);
+        setPagination(data.data.pagination);
+        setCurrentPage(page);
       }
     } catch (error) {
       console.error('Failed to load tasks:', error);
@@ -47,7 +76,6 @@ export default function DashboardPage() {
       setChecking(false);
     }
   }
-
 
   async function handleStatusChange(
     taskId: number,
@@ -79,7 +107,6 @@ export default function DashboardPage() {
       setError('Something went wrong while updating the task.');
     }
   }
-
 
   async function handleEditTask(
     taskId: number,
@@ -125,7 +152,6 @@ export default function DashboardPage() {
     }
   }
 
-
   function startEditing(task: Task) {
     setEditingTaskId(task.id);
     setEditedTitle(task.title);
@@ -147,10 +173,14 @@ export default function DashboardPage() {
 
     async function fetchInitialTasks() {
       try {
-        const { response, data } = await getAuthenticated('/api/tasks', token);
+        const { response, data } = await getAuthenticated(
+          '/api/tasks?page=1&limit=5',
+          token
+        );
 
         if (!ignore && response.ok) {
           setTasks(data.data.tasks);
+          setPagination(data.data.pagination);
         }
       } catch (error) {
         console.error('Failed to load tasks:', error);
@@ -256,9 +286,17 @@ export default function DashboardPage() {
     return matchesSearch && matchesStatus;
   });
 
+  const totalPages = pagination?.totalPages ?? 0;
+  const paginatedTasks = filteredTasks;
+
   return (
     <main className="p-8">
-      <h1 className="text-3xl font-bold">TaskFlow Dashboard</h1>
+      <div className="flex justify-between">
+        <h1 className="text-3xl font-bold">TaskFlow Dashboard</h1>
+        <p className="mt-2 mr-4 text-green-600">
+          Logged in
+        </p>
+      </div>
       {error && <p className="mt-4 text-red-600">{error}</p>}
       <form onSubmit={handleCreateTask} className="flex flex-col gap-3 sm:flex-row">
         <input
@@ -291,13 +329,41 @@ export default function DashboardPage() {
           type="text"
           placeholder="Search tasks..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            const value = e.target.value;
+
+            setSearch(value);
+            setCurrentPage(1);
+
+            const token = sessionStorage.getItem('token');
+
+            if (!token) {
+              router.replace('/login');
+              return;
+            }
+
+            void loadTasks(token, 1, value, statusFilter);
+          }}
           className="w-full rounded border p-3 sm:flex-1"
         />
 
         <select
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+          onChange={(e) => {
+            const value = e.target.value;
+
+            setStatusFilter(value);
+            setCurrentPage(1);
+
+            const token = sessionStorage.getItem('token');
+
+            if (!token) {
+              router.replace('/login');
+              return;
+            }
+
+            void loadTasks(token, 1, search, value);
+          }}
           className="w-full rounded border p-3 sm:w-48"
         >
           <option value="">All statuses</option>
@@ -314,7 +380,7 @@ export default function DashboardPage() {
           <p>No tasks yet. Create your first task!</p>
         ) : (
           <ul className="space-y-3">
-            {filteredTasks.map((task) => (
+            {paginatedTasks.map((task) => (
               <li
                 key={task.id}
                 className="flex items-center justify-between rounded border p-4"
@@ -413,10 +479,43 @@ export default function DashboardPage() {
             ))}
           </ul>
         )}
+
+        {tasks !== null && filteredTasks.length > 0 && (
+          <div className="max-w-1/2 mx-auto mt-8 flex flex-wrap items-center justify-between">
+            <button
+              type="button"
+              onClick={() => {
+                const token = sessionStorage.getItem('token');
+                if (token) {
+                  void loadTasks(token, currentPage - 1);
+                }
+              }}
+              disabled={currentPage === 1}
+              className="rounded border px-4 py-2 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Previous
+            </button>
+            <p className="text-sm text-gray-600">
+              Page {currentPage} / {totalPages}
+              {' '}({pagination?.total ?? 0} tasks)
+            </p>
+
+            <button
+              type="button"
+              onClick={() => {
+                const token = sessionStorage.getItem('token');
+                if (token) {
+                  void loadTasks(token, currentPage + 1);
+                }
+              }}
+              disabled={currentPage >= totalPages}
+              className="rounded border px-4 py-2 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
-      <p className="mt-2 text-green-600">
-        You are logged in.
-      </p>
     </main>
   );
 }
