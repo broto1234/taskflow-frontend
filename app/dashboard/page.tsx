@@ -35,6 +35,9 @@ export default function DashboardPage() {
   const [statusFilter, setStatusFilter] = useState('');
 
   const [currentPage, setCurrentPage] = useState(1);
+
+  const [sortBy, setSortBy] = useState('createdAt');
+  const [sortOrder, setSortOrder] = useState('desc');
   
   const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
   const [editedTitle, setEditedTitle] = useState('');
@@ -44,12 +47,16 @@ export default function DashboardPage() {
   token: string,
   page = 1,
   searchTerm = search,
-  selectedStatus = statusFilter
+  selectedStatus = statusFilter,
+  selectedSortBy = sortBy,
+  selectedSortOrder = sortOrder
 ) {
     try {
       const params = new URLSearchParams({
         page: String(page),
         limit: '5',
+        sortBy: selectedSortBy,
+        order: selectedSortOrder,
       });
 
       if (searchTerm.trim()) {
@@ -364,12 +371,60 @@ export default function DashboardPage() {
 
             void loadTasks(token, 1, search, value);
           }}
-          className="w-full rounded border p-3 sm:w-48"
+          className="w-full rounded border p-3 sm:w-40"
         >
           <option value="">All statuses</option>
           <option value="TODO">To do</option>
           <option value="IN_PROGRESS">In progress</option>
           <option value="COMPLETED">Completed</option>
+        </select>
+
+        <select
+          value={sortBy}
+          onChange={(e) => {
+            const value = e.target.value;
+
+            setSortBy(value);
+            setCurrentPage(1);
+
+            const token = sessionStorage.getItem('token');
+
+            if (!token) {
+              router.replace('/login');
+              return;
+            }
+
+            void loadTasks(token, 1, search, statusFilter, value, sortOrder);
+          }}
+          className="w-full rounded border p-3 sm:w-40"
+        >
+          <option value="createdAt">Date created</option>
+          <option value="updatedAt">Last updated</option>
+          <option value="title">Title</option>
+          <option value="status">Status</option>
+        </select>
+
+        <select
+          value={sortOrder}
+          onChange={(e) => {
+            const value = e.target.value;
+
+            setSortOrder(value);
+            setCurrentPage(1);
+
+            const token = sessionStorage.getItem('token');
+
+            if (!token) {
+              router.replace('/login');
+              return;
+            }
+
+            void loadTasks(token, 1, search, statusFilter, sortBy, value);
+          }}
+          className="w-full rounded border p-3 sm:w-40"
+        >
+          <option value="desc">Descending</option>
+          <option value="asc">Ascending</option>
         </select>
       </div>
 
